@@ -1,36 +1,43 @@
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     inject,
     input,
-    InputSignal,
+    InputSignalWithTransform,
     ViewChild
 } from '@angular/core';
 import { Offer } from '../../models/offers.types';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { MatTable, MatTableModule } from '@angular/material/table';
-import { MatSort, Sort } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 
 @Component({
     selector: 'app-offers-table',
     imports: [
-        MatTableModule, MatTable, MatSort
+        MatTableModule, MatSortModule
     ],
     templateUrl: './offers-table.html',
     styleUrl: './offers-table.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OffersTable {
-    public offers: InputSignal<Offer[]> = input.required();
+export class OffersTable implements AfterViewInit {
+    public offers: InputSignalWithTransform<MatTableDataSource<Offer>, Offer[]> = input.required(
+        {transform: (v: Offer[]) => new MatTableDataSource(v)}
+    );
     private _liveAnnouncer = inject(LiveAnnouncer);
 
     displayedColumns: string[] = ['id', 'product', 'price', 'volume', 'updatedAt'];
-    // dataSource: MatTableDataSource<Offer[]>;
 
     @ViewChild(MatSort) sort!: MatSort;
 
+    ngAfterViewInit(): void {
+        this.offers().sort = this.sort;
+    }
+
     /** Announce the change in sort state for assistive technology. */
     announceSortChange(sortState: Sort) {
+        console.log(sortState);
         if (sortState.direction) {
             this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
         } else {
