@@ -1,1 +1,3 @@
-<p>trading-session-page works!</p>
+<div class="offers-table-container">
+    <app-offers-table [offers]="(offers$ | async) ?? []" />
+</div>

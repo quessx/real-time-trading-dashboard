@@ -24,11 +24,20 @@ export const tradingSessionReducer = createReducer(
     on(TradingSessionActions.loadOffers, (state, {offers}) =>
         tradingSessionAdapter.setAll(offers, {...state, loading: false})
     ),
-    on(TradingSessionActions.loadOffersFail, (state, { error }) => ({
+    on(TradingSessionActions.loadOffersFail, (state, {error}) => ({
         ...state,
         loading: false,
         error
     })),
+    on(TradingSessionActions.offerCreated, (state, {offer}) =>
+        tradingSessionAdapter.addOne(offer, state)
+    ),
+    on(TradingSessionActions.offerUpdated, (state, {offer}) =>
+        tradingSessionAdapter.updateOne({id: offer.id, changes: offer}, state)
+    ),
+    on(TradingSessionActions.offerDeleted, (state, {id}) =>
+        tradingSessionAdapter.removeOne(id, state)
+    )
 );
 
 export const tradingSessionFeature = createFeature({

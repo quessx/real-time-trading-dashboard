@@ -1,47 +1,102 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { SocketEvent, WebSocketStatus } from '../models/websocket.types';
 
 @Injectable({
     providedIn: 'root',
 })
 export class WebsocketService {
-    private connectedSessionId: number | null = null;
     private socket: WebSocket | null = null;
-    private readonly websocketBaseUrl = 'ws://localhost:5160/ws/offers';
+    private readonly websocketBaseUrl = 'ws://localhost:5000/ws/offers';
 
+    public status: WritableSignal<WebSocketStatus> = signal('offline');
+    public eventSocket: WritableSignal<SocketEvent | null> = signal(null);
     private store: Store = inject(Store);
 
-    public start(sessionId: number): void {
-        const isSameSession: boolean = this.connectedSessionId === sessionId;
+    public start(): void {
         const isConnectingOrOpen =
             this.socket?.readyState === WebSocket.CONNECTING || this.socket?.readyState === WebSocket.OPEN;
 
-        if (isSameSession && isConnectingOrOpen) {
+        if (isConnectingOrOpen) {
             return;
         }
 
-        this.connectedSessionId = sessionId;
         this.openConnection();
     }
 
     private openConnection(): void {
-        if (this.connectedSessionId === null) {
-            return;
-        }
         let socket: WebSocket;
 
         try {
-            socket = new WebSocket(`${this.websocketBaseUrl}?sessionId=${this.connectedSessionId}`);
+            socket = new WebSocket(`${this.websocketBaseUrl}`);
         } catch {
-            console.log('status offline');
+            this.status.update((): WebSocketStatus => 'offline');
             //todo try reconect
-            console.log('reconnect');
             return;
         }
+
+        this.socket = socket;
 
         socket.onopen = () => {
-            return;
+            if (socket !== this.socket) {
+                return;
+            }
+
+            this.status.update(() => 'online');
         }
 
+        socket.onmessage = (event: MessageEvent<string>) => {
+            if (socket !== this.socket) {
+                return;
+            }
+
+            let socketEvent: SocketEvent | null = null;
+
+            try {
+                socketEvent = this.parseSocketEvent(event.data);
+            } catch {
+                console.error('event.data', event.data);
+            }
+
+            if (!socketEvent) {
+                return;
+            }
+
+            this.eventSocket.set(socketEvent);
+        }
+
+        socket.onerror = () => {
+            if (socket !== this.socket) {
+                return;
+            }
+
+            this.status.update(() => 'offline');
+        }
+
+        socket.onclose = () => {
+            if (socket !== this.socket) {
+                return;
+            }
+
+            this.socket = null;
+            this.status.update(() => 'offline');
+        };
+    }
+
+    private parseSocketEvent(data: string): SocketEvent | null {
+        let socketEvent: SocketEvent;
+
+        try {
+            socketEvent = JSON.parse(data);
+        } catch {
+            return null;
+        }
+
+
+        if (typeof socketEvent['payload'] !== 'object') {
+            return null;
+        }
+
+        return socketEvent;
     }
 }

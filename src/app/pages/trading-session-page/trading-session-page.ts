@@ -1,12 +1,22 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { selectOffers } from '../../store/state/trading-session.selectors';
+import { Store } from '@ngrx/store';
+import { AsyncPipe } from '@angular/common';
+import { Observable } from 'rxjs';
+import { Offer } from '../../models/offers.types';
+import { OffersTable } from '../offers-table/offers-table';
 
 @Component({
   selector: 'app-trading-session-page',
-  imports: [],
+    imports: [
+        AsyncPipe,
+        OffersTable
+    ],
   templateUrl: './trading-session-page.html',
   styleUrl: './trading-session-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TradingSessionPage {
-
+    store = inject(Store);
+    offers$: Observable<Offer[]> = this.store.select(selectOffers);
 }
