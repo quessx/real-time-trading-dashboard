@@ -10,12 +10,11 @@ import { Offer } from '../../models/offers.types';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { MatTable, MatTableModule } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
-import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 
 @Component({
     selector: 'app-offers-table',
     imports: [
-        MatTableModule, MatTab, MatTable, MatTabGroup, MatTabLabel, MatSort
+        MatTableModule, MatTable, MatSort
     ],
     templateUrl: './offers-table.html',
     styleUrl: './offers-table.css',

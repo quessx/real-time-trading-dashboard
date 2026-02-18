@@ -1,4 +1,5 @@
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { inject, Injectable, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { SocketEvent, WebSocketStatus } from '../models/websocket.types';
 
@@ -8,12 +9,19 @@ import { SocketEvent, WebSocketStatus } from '../models/websocket.types';
 export class WebsocketService {
     private socket: WebSocket | null = null;
     private readonly websocketBaseUrl = 'ws://localhost:5000/ws/offers';
+    private readonly platformId = inject(PLATFORM_ID);
+    private readonly isBrowser = isPlatformBrowser(this.platformId);
 
     public status: WritableSignal<WebSocketStatus> = signal('offline');
     public eventSocket: WritableSignal<SocketEvent | null> = signal(null);
     private store: Store = inject(Store);
 
     public start(): void {
+        if (!this.isBrowser) {
+            this.status.update((): WebSocketStatus => 'offline');
+            return;
+        }
+
         const isConnectingOrOpen =
             this.socket?.readyState === WebSocket.CONNECTING || this.socket?.readyState === WebSocket.OPEN;
 
