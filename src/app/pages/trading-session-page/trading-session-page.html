@@ -1,3 +1,4 @@
 <div class="offers-table-container">
+    <app-websocket-status />
     <app-offers-table [offers]="(offers$ | async) ?? []" />
 </div>

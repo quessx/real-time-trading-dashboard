@@ -7,7 +7,7 @@ import { TradingSessionActions } from './trading-session.actions';
 export interface TradingSessionState extends EntityState<Offer> {
     loading: boolean;
     error: HttpErrorResponse | null;
-    websocketStatus: 'Online' | 'Offline';
+    websocketStatus: 'online' | 'offline';
 }
 
 export const tradingSessionAdapter: EntityAdapter<Offer> = createEntityAdapter<Offer>();
@@ -15,7 +15,7 @@ export const tradingSessionAdapter: EntityAdapter<Offer> = createEntityAdapter<O
 const initialState: TradingSessionState = tradingSessionAdapter.getInitialState({
     loading: false,
     error: null,
-    websocketStatus: 'Offline'
+    websocketStatus: 'offline'
 });
 
 export const tradingSessionReducer = createReducer(
@@ -37,7 +37,11 @@ export const tradingSessionReducer = createReducer(
     ),
     on(TradingSessionActions.offerDeleted, (state, {id}) =>
         tradingSessionAdapter.removeOne(id, state)
-    )
+    ),
+    on(TradingSessionActions.wsChanged, (state, {status}) => ({
+        ...state,
+        websocketStatus: status
+    }))
 );
 
 export const tradingSessionFeature = createFeature({

@@ -1,0 +1,7 @@
+<div class="websocket-status">
+    @if ((wsStatus$ | async) === 'online') {
+        🟢 Online
+    } @else {
+        🔴 Offline
+    }
+</div>

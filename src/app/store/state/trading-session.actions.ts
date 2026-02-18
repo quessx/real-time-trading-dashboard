@@ -1,6 +1,7 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { Offer } from '../../models/offers.types';
 import { HttpErrorResponse } from '@angular/common/http';
+import { WebSocketStatus } from '../../models/websocket.types';
 
 export const TradingSessionActions = createActionGroup({
     source: 'Trading Session',
@@ -12,5 +13,6 @@ export const TradingSessionActions = createActionGroup({
         offerCreated: props<{ offer: Offer }>(),
         offerUpdated: props<{ offer: Offer }>(),
         offerDeleted: props<{ id: number }>(),
+        wsChanged: props<{ status: WebSocketStatus }>()
     },
 });

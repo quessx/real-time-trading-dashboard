@@ -4,13 +4,15 @@ import { Store } from '@ngrx/store';
 import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { Offer } from '../../models/offers.types';
-import { OffersTable } from '../offers-table/offers-table';
+import { OffersTable } from '../../ui/offers-table/offers-table';
+import { WebsocketStatus } from '../../ui/websocket-status/websocket-status';
 
 @Component({
   selector: 'app-trading-session-page',
     imports: [
         AsyncPipe,
-        OffersTable
+        OffersTable,
+        WebsocketStatus
     ],
   templateUrl: './trading-session-page.html',
   styleUrl: './trading-session-page.css',

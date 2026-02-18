@@ -10,7 +10,7 @@ import { Action, Store } from '@ngrx/store';
 import { selectRouteSessionId } from './trading-session.selectors';
 import { WebsocketService } from '../../services/websocket.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { SocketEvent } from '../../models/websocket.types';
+import { SocketEvent, WebSocketStatus } from '../../models/websocket.types';
 
 type TSocketEvent =
     | { offer: Offer } & Action<"[Trading Session] offerCreated">
@@ -55,12 +55,12 @@ export class TradingSessionEffects {
     });
 
     wsConnecting$ = createEffect((): Observable<void> =>
-        this.actions$.pipe(
-            ofType(TradingSessionActions.connectSession),
-            map((): void =>
-                this.websocketService.start()
-            )
-        ),
+            this.actions$.pipe(
+                ofType(TradingSessionActions.connectSession),
+                map((): void =>
+                    this.websocketService.start()
+                )
+            ),
         {dispatch: false}
     )
 
@@ -68,7 +68,6 @@ export class TradingSessionEffects {
         toObservable(this.websocketService.eventSocket).pipe(
             filter((socketEvent: SocketEvent | null): socketEvent is SocketEvent => !!socketEvent),
             switchMap((event: SocketEvent): Observable<TSocketEvent> => {
-                console.log(event);
                 switch (event.type) {
                     case "OFFER_CREATED":
                         return of(TradingSessionActions.offerCreated({offer: event.payload}));
@@ -80,6 +79,12 @@ export class TradingSessionEffects {
                         return EMPTY;
                 }
             })
+        )
+    );
+
+    wsStatusChanged$ = createEffect(() =>
+        toObservable(this.websocketService.status).pipe(
+            map((status: WebSocketStatus) => TradingSessionActions.wsChanged({status}))
         )
     )
 }

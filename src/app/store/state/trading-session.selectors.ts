@@ -31,6 +31,11 @@ export const selectOffers = createSelector(
         .filter((offer): offer is Offer => offer !== undefined)
 );
 
+export const selectWsStatus = createSelector(
+    selectTradingSessionState,
+    state => state.websocketStatus ?? 'offline'
+);
+
 export const selectSessionLoading = selectLoading;
 
 export const selectSessionError = selectError;
